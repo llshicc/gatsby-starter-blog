@@ -219,6 +219,32 @@ function isThenable(value) {
 }
 ```
 
+有了resolve方法，我们就可以在创建新Promise的时候执行传入的函数。
+
+完善后的constructor如下。
+
+```javascript
+class MyPromise {
+  constructor(resolver) {
+    this._result = undefined;
+    this._state = PENDING;
+    this._subscribers = [];
+
+    if (typeof resolver !== 'function') {
+      throw new TypeError('The first parameter must be a resolver function');
+    }
+    resolver(
+      (value) => {
+        resolve(this, value);
+      },
+      (reason) => {
+        reject(this, reason);
+      }
+    );
+  }
+}
+```
+
 ##### 4. then
 
 首先我们都知道then的callback应该在微任务中执行，所以用`schedule`方法把添加到微任务中。(以下只模拟了浏览器和node)
